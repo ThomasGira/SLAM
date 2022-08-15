@@ -2,7 +2,7 @@ from cv2 import destroyAllWindows
 from .thread_class import ThreadCLass
 import cv2 as cv
 
-
+import time
 class Map(ThreadCLass):
     width = 500
     height = 500  # window size
@@ -22,8 +22,8 @@ class Map(ThreadCLass):
         super().__init__()
 
     def initialize(self):
-        cv.imshow("map", self._raw_map)
-        print(self._raw_map)
+        for object in self._objects:
+            object.initialize(cv_cb = self.cv_cb)
         super().initialize(thread_timeout=0.1)
 
     def _draw_objects(self, map):
@@ -41,7 +41,9 @@ class Map(ThreadCLass):
         self._draw_objects(map)
         cv.imshow("map", map)
         # self.draw()
-
+    def cv_cb(self, type, map, contours,index,color,thickness):
+        if type == "rectangle":
+            cv.fillPoly(map, [contours], color=color)
     def _panic(self):
         cv.destroyAllWindows()
         self._cleanup()

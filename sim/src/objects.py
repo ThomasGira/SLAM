@@ -21,7 +21,8 @@ class Object:
     @property
     def orientation(self):
         return self._orientation
-
+    def initialize(self,cv_cb):
+        self._cv_cb = cv_cb
     def set_pose(self, x=0, y=0, z=0):
         self._pose = (x, y, z)
 
@@ -31,7 +32,7 @@ class Object:
 
     def rotate(self, x=0, y=0, z=0):
         px, py, pz = self._orientation
-        self.orentation = (px + x, py + y, pz + z)
+        self._orientation = (px + x, py + y, pz + z)
 
     def apply_rotation(self, point, rot_x=0, rot_y=0, rot_z=0, center=(0, 0, 0)):
         """Apply a roation to a point in the order x,y,z"""
@@ -128,6 +129,11 @@ class Rectangle(Object):
         x2, y2, z2 = tr
         p1 = (int(x1), int(y1))
         p2 = (int(x2), int(y2))
-        print(f"p1: {p1}, p2: {p2}")
-        print(self._color)
-        cv.rectangle(map, p1, p2, color=self._color, thickness=-1)
+
+        contours = []
+        for coord in translated_coordinates:
+            contour = [coord[0], coord[1]]
+            contours.append(contour)
+        contours = np.array(contours,np.int32)
+        contours = contours.reshape((-1, 1, 2))
+        self._cv_cb("rectangle",map, contours,-1, color=self._color, thickness=-1)
