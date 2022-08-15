@@ -16,12 +16,12 @@ class ThreadCLass:
 
     def initialize(self, thread_timeout):
         self._watchdog_timeout = thread_timeout
-        self._pet_watchdog()
         self._thread_should_run = True
         self._thread = Thread(target=self._thread_wrapper, args=(), daemon=True)
+        self._pet_watchdog()
         self._start_watchdog()
-        logging.info(f"Starting thread {self.name}")
-        self._thread.run()
+        print(f"Starting {self.name()} thread")
+        self._thread.start()
 
     def _pet_watchdog(self):
         self._last_thread_time = time.monotonic()
@@ -29,7 +29,8 @@ class ThreadCLass:
     def _watchdog(self):
         current_time = time.monotonic()
         if current_time - self._last_thread_time > self._watchdog_timeout:
-            self._panic()
+            # self._panic()
+            print(f"wathchdog for {self.name()} expired")
 
         self._start_watchdog()
 

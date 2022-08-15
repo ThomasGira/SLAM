@@ -14,7 +14,7 @@ class KeyPoller:
         self.new_term[3] = self.new_term[3] & ~termios.ICANON & ~termios.ECHO
         termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.new_term)
 
-    def __del__(self, type, value, traceback):
+    def __del__(self):
         termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.old_term)
 
     def poll(self):

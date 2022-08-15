@@ -1,56 +1,47 @@
+from cv2 import destroyAllWindows
 from .thread_class import ThreadCLass
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-from OpenGL.GLU import *
+import cv2 as cv
 
 
 class Map(ThreadCLass):
-    window = 0  # glut window number
-    width, height = 1920, 1080  # window size
+    width = 500
+    height = 500  # window size
     pos = 0
 
-    def name(self):
-        return self._name
+    def name(
+        self,
+    ):
+        return "map"
 
-    def __init__(self, objects):
+    def __init__(self, objects, map):
         self._objects = objects
-        print(self._objects)
+        temp = cv.imread("src/photos/" + map, 0)
+        temp = cv.resize(temp, (self.width, self.height), interpolation=cv.INTER_LINEAR)
+        ret, temp  = cv.threshold(temp, 127, 255, cv.THRESH_BINARY)
+        self._raw_map = cv.cvtColor(temp, 0)
         super().__init__()
 
-        glutInit()  # initialize glut
-        glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_ALPHA | GLUT_DEPTH)
-        glutInitWindowSize(self.width, self.height)  # set window size
-        glutInitWindowPosition(0, 0)  # set window position
-        self.window = glutCreateWindow("SLAM")  # create window with title
-        glutDisplayFunc(self.draw)  # set draw function callback
-        glutIdleFunc(self.draw)  # draw all the time
-        glutMainLoop()  # start everything
-
     def initialize(self):
+        cv.imshow("map", self._raw_map)
+        print(self._raw_map)
         super().initialize(thread_timeout=0.1)
 
-    def _draw_objects(self):
+    def _draw_objects(self, map):
         for object in self._objects:
-            object.draw()
+            object.draw(map)
 
-    def refresh2d(self, width, height):
-        glViewport(0, 0, width, height)
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
-        glOrtho(0.0, width, 0.0, height, 0.0, 1.0)
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-
-    def draw(self):  # ondraw is called all the time
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)  # clear the screen
-        glLoadIdentity()  # reset position
-        self.refresh2d(self.width, self.height)
+    def draw(self):
         self._draw_objects()
 
-        glutSwapBuffers()  # important for double buffering
-
     def _thread_function(self):
-        pass
+        if cv.waitKey(20) & 0xFF == ord("q"):
+            cv.destroyAllWindows()
+            self._panic()
+        map = self._raw_map.copy()
+        self._draw_objects(map)
+        cv.imshow("map", map)
+        # self.draw()
 
     def _panic(self):
-        pass
+        cv.destroyAllWindows()
+        self._cleanup()
